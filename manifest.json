@@ -1,0 +1,10 @@
+﻿{
+    "Name": "Regression",
+    "Author": "Sabrina",
+    "Version": "1.0.0",
+    "Description": "Diaper Wetting Mod",
+    "UniqueID": "Sabrina.Regression",
+    "EntryDll": "Regression.dll",
+    "MinimumApiVersion": "2.10.0",
+    "UpdateKeys": []
+}
