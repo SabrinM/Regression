@@ -23,7 +23,7 @@ namespace SM
 
         public static void Warn(string msg, Body b = null)
         {
-            Game1.addHUDMessage(new HUDMessage(Strings.InsertVariables(msg, b, (Container)null), 2));
+            Game1.addHUDMessage(new HUDMessage(Strings.InsertVariables(msg, b, (Underwear)null), 2));
         }
 
         public static void Warn(string[] msgs, Body b = null)
@@ -33,7 +33,7 @@ namespace SM
 
         public static void Say(string msg, Body b = null)
         {
-            Game1.showGlobalMessage(Strings.InsertVariables(msg, b, (Container)null));
+            Game1.showGlobalMessage(Strings.InsertVariables(msg, b, (Underwear)null));
         }
 
         public static void Say(string[] msgs, Body b = null)
@@ -43,7 +43,7 @@ namespace SM
 
         public static void Write(string msg, Body b = null)
         {
-            Game1.drawObjectDialogue(Strings.InsertVariables(msg, b, (Container)null));
+            Game1.drawObjectDialogue(Strings.InsertVariables(msg, b, (Underwear)null));
         }
 
         public static void Write(string[] msgs, Body b = null)
@@ -53,12 +53,12 @@ namespace SM
 
         public static void CheckPants(Body b)
         {
-            Animations.Say(Animations.t.LookPants[0] + " " + Strings.DescribeUnderwear(b.pants, (string)null) + ".", b);
+            Animations.Say(Animations.t.LookPants[0] + " " + Strings.DescribeUnderwear(b.bottoms, (string)null) + ".", b);
         }
 
         public static void CheckUnderwear(Body b)
         {
-            Animations.Say(Animations.t.PeekWaistband[0] + " " + Strings.DescribeUnderwear(b.underwear.container, (string)null) + ".", b);
+            Animations.Say(Animations.t.PeekWaistband[0] + " " + Strings.DescribeUnderwear(b.underwear, (string)null) + ".", b);
         }
 
         public static void AnimateDrinking(bool waterSource = false)
@@ -113,7 +113,7 @@ namespace SM
 
         public static void AnimateWettingEnd(Body b)
         {
-            if (b.wettingUnderwear && (double)b.pants.wetness > (double)b.pants.absorbency)
+            if (b.wettingUnderwear && (double)b.bottoms.Wetness > (double)b.bottoms.absorbency)
             {
                 Animations.player1.currentLocation.temporarySprites.Add(new TemporaryAnimatedSprite(13, (Vector2)Game1.player.position, Microsoft.Xna.Framework.Color.White, 10, Game1.random.NextDouble() < 0.5, 70f, 0, Game1.tileSize, 0.05f, -1, 0));
                 if ((Animations.player1.currentLocation.terrainFeatures).ContainsKey(Animations.player1.getTileLocation()) && (Animations.player1.currentLocation.terrainFeatures)[Animations.player1.getTileLocation()] is HoeDirt terrainFeature)
@@ -192,8 +192,8 @@ namespace SM
 
         public static void AnimateMorning(Body b)
         {
-            bool flag = (double)b.pants.wetness > 0.0;
-            bool second = (double)b.pants.messiness > 0.0;
+            bool flag = (double)b.bottoms.Wetness > 0.0;
+            bool second = (double)b.bottoms.Messiness > 0.0;
             string msg = "" + Strings.RandString(Animations.t.Wake_Up_Underwear_State);
             if (second)
             {
@@ -215,9 +215,9 @@ namespace SM
             Animations.Write(Animations.t.Bedding_Still_Wet, b);
         }
 
-        public static void AnimateWashingUnderwear(Container c)
+        public static void AnimateWashingUnderwear(Underwear underwear)
         {
-            Animations.Write(Strings.InsertVariables(Strings.RandString(Animations.t.Washing_Underwear), (Body)null, c), (Body)null);
+            Animations.Write(Strings.InsertVariables(Strings.RandString(Animations.t.Washing_Underwear), (Body)null, underwear), (Body)null);
         }
 
         public static Texture2D LoadTexture(string file)
@@ -233,34 +233,63 @@ namespace SM
             return Texture2D.FromStream(Game1.graphics.GraphicsDevice, (Stream)memoryStream);
         }
 
-        public static Microsoft.Xna.Framework.Rectangle UnderwearRectangle(Container c, string type = null, int height = 16)
+        public static Microsoft.Xna.Framework.Rectangle UnderwearRectangle(Underwear underwear, string type = null, int height = 16)
         {
-            if (c.spriteIndex == -1)
+            if (underwear.spriteIndex == -1)
                 throw new Exception("Invalid sprite index.");
-            int num = type != null ? (!(type == "drying") ? (!(type == "messy") ? (!(type == "wet") ? 0 : 16) : 32) : 48) : (!c.isDrying ? ((double)c.messiness <= 0.0 ? ((double)c.wetness <= 0.0 ? 0 : 16) : 32) : 48);
-            return new Microsoft.Xna.Framework.Rectangle(c.spriteIndex * 16, num + (16 - height), 16, height);
+            int row = 0;
+            switch(type)
+            {
+                case "clean":
+                    row = 0;
+                    break;
+                case "wet":
+                    row = 16;
+                    break;
+                case "messy":
+                    row = 32;
+                    break;
+                case "drying":
+                    row = 48;
+                    break;
+                default:
+                    switch (underwear.CleanStatus)
+                    {
+                        case 1:
+                            row = 48;
+                            break;
+                        case 2:
+                            if(underwear.Messiness > 0f)
+                                row = 32;
+                            else
+                                row = 16;
+                            break;
+                    }
+                    break;
+            }
+            return new Microsoft.Xna.Framework.Rectangle(underwear.spriteIndex * 16, row + (16 - height), 16, height);
         }
 
-        public static void DrawUnderwearIcon(Container container, int x, int y)
+        public static void DrawUnderwearIcon(Underwear underwear, int x, int y)
         {
-            if (container.isDrying)
+            if (underwear.CleanStatus == 1)
             {
-                Game1.spriteBatch.Draw(Animations.sprites, new Microsoft.Xna.Framework.Rectangle(x, y, 64, 64), new Microsoft.Xna.Framework.Rectangle?(Animations.UnderwearRectangle(container, "drying", 16)), Microsoft.Xna.Framework.Color.White);
+                Game1.spriteBatch.Draw(Animations.sprites, new Microsoft.Xna.Framework.Rectangle(x, y, 64, 64), new Microsoft.Xna.Framework.Rectangle?(Animations.UnderwearRectangle(underwear, "drying", 16)), Microsoft.Xna.Framework.Color.White);
             }
             else
             {
-                Game1.spriteBatch.Draw(Animations.sprites, new Microsoft.Xna.Framework.Rectangle(x, y, 64, 64), new Microsoft.Xna.Framework.Rectangle?(Animations.UnderwearRectangle(container, "clean", 16)), Microsoft.Xna.Framework.Color.White);
-                int height1 = Math.Min((int)((double)container.wetness / (double)container.absorbency * 16.0), 16);
-                int height2 = Math.Min((int)((double)container.messiness / (double)container.containment * 16.0), 16);
+                Game1.spriteBatch.Draw(Animations.sprites, new Microsoft.Xna.Framework.Rectangle(x, y, 64, 64), new Microsoft.Xna.Framework.Rectangle?(Animations.UnderwearRectangle(underwear, "clean", 16)), Microsoft.Xna.Framework.Color.White);
+                int height1 = Math.Min((int)((double)underwear.Wetness / (double)underwear.absorbency * 16.0), 16);
+                int height2 = Math.Min((int)((double)underwear.Messiness / (double)underwear.containment * 16.0), 16);
                 if (height1 > 0 && height1 >= height2)
-                    Game1.spriteBatch.Draw(Animations.sprites, new Microsoft.Xna.Framework.Rectangle(x, y + (64 - height1 * 4), 64, height1 * 4), new Microsoft.Xna.Framework.Rectangle?(Animations.UnderwearRectangle(container, "wet", height1)), Microsoft.Xna.Framework.Color.White);
+                    Game1.spriteBatch.Draw(Animations.sprites, new Microsoft.Xna.Framework.Rectangle(x, y + (64 - height1 * 4), 64, height1 * 4), new Microsoft.Xna.Framework.Rectangle?(Animations.UnderwearRectangle(underwear, "wet", height1)), Microsoft.Xna.Framework.Color.White);
                 if (height2 > 0)
-                    Game1.spriteBatch.Draw(Animations.sprites, new Microsoft.Xna.Framework.Rectangle(x, y + (64 - height2 * 4), 64, height2 * 4), new Microsoft.Xna.Framework.Rectangle?(Animations.UnderwearRectangle(container, "messy", height2)), Microsoft.Xna.Framework.Color.White);
+                    Game1.spriteBatch.Draw(Animations.sprites, new Microsoft.Xna.Framework.Rectangle(x, y + (64 - height2 * 4), 64, height2 * 4), new Microsoft.Xna.Framework.Rectangle?(Animations.UnderwearRectangle(underwear, "messy", height2)), Microsoft.Xna.Framework.Color.White);
                 if (height1 > 0 && height1 < height2)
-                    Game1.spriteBatch.Draw(Animations.sprites, new Microsoft.Xna.Framework.Rectangle(x, y + (64 - height1 * 4), 64, height1 * 4), new Microsoft.Xna.Framework.Rectangle?(Animations.UnderwearRectangle(container, "wet", height1)), Microsoft.Xna.Framework.Color.White);
+                    Game1.spriteBatch.Draw(Animations.sprites, new Microsoft.Xna.Framework.Rectangle(x, y + (64 - height1 * 4), 64, height1 * 4), new Microsoft.Xna.Framework.Rectangle?(Animations.UnderwearRectangle(underwear, "wet", height1)), Microsoft.Xna.Framework.Color.White);
                 if (Game1.getMouseX() >= x && Game1.getMouseX() <= x + 64 && Game1.getMouseY() >= y && Game1.getMouseY() <= y + 64)
                 {
-                    string source = Strings.DescribeUnderwear(container, (string)null);
+                    string source = Strings.DescribeUnderwear(underwear, (string)null);
                     string text = source.First<char>().ToString().ToUpper() + source.Substring(1);
                     int width = Game1.tileSize * 6 + Game1.tileSize / 6;
                     IClickableMenu.drawHoverText(Game1.spriteBatch, Game1.parseText(text, Game1.tinyFont, width), Game1.smallFont, 0, 0, -1, (string)null, -1, (string[])null, (Item)null, 0, -1, -1, -1, -1, 1f, (CraftingRecipe)null);
@@ -400,7 +429,7 @@ namespace SM
             
             string dialogueString = animalName + Strings.InsertVariables(
                 Strings.ReplaceAndOr( Strings.RandString(reactionStrings.ToArray()), !mess, mess, "&"),
-                body, (Container)null);
+                body, (Underwear)null);
             
             npc.setNewDialogue(dialogueString, true, true);
             Game1.drawDialogue(npc);

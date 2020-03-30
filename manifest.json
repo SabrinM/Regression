@@ -5,6 +5,6 @@
     "Description": "Diaper Wetting Mod",
     "UniqueID": "Sabrina.Regression",
     "EntryDll": "Regression.dll",
-    "MinimumApiVersion": "2.10.0",
+    "MinimumApiVersion": "3.3.0",
     "UpdateKeys": []
 }

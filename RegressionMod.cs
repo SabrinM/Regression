@@ -1,5 +1,4 @@
 ﻿using Microsoft.Xna.Framework;
-using Regression;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
@@ -10,7 +9,6 @@ using StardewValley.Tools;
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using System.Linq;
 
 namespace SM
 {
@@ -36,6 +34,8 @@ namespace SM
             RegressionMod.events = helper.Events;
             RegressionMod.config = this.Helper.ReadConfig<Config>();
             RegressionMod.data = this.Helper.Data.ReadJsonFile<Data>(string.Format("{0}.json", (object)SM.RegressionMod.config.Lang)) ?? this.Helper.Data.ReadJsonFile<Data>("en.json");
+            RegressionMod.data.underwearInformation = Helper.Data.ReadJsonFile<Dictionary<int, string>>("Assets\\UnderwearInformation.json");
+            RegressionMod.data.underwearInformation.Remove(-3);
             events.GameLoop.SaveLoaded += RecieveSaveLoaded;
             events.GameLoop.Saving += this.ReceiveBeforeSave;
             events.GameLoop.DayStarted += this.ReceiveAfterDayStarted;
@@ -51,15 +51,17 @@ namespace SM
         private void RecieveSaveLoaded(object sender, SaveLoadedEventArgs e)
         {
             this.body = this.Helper.Data.ReadJsonFile<Body>(string.Format("{0}/RegressionSave.json", (object)Constants.SaveFolderName)) ?? new Body();
-            body.underwear.container = body.underwearContainer;
-            SM.RegressionMod.started = true;
-            SM.RegressionMod.player1 = Game1.player;
+
+            started = true;
+            player1 = Game1.player;
 
             if (Game1.dayOfMonth == 1 && Game1.year == 1)
             {
                 Game1.player.mailbox.Add("RegressionStart");
                 Game1.player.mailReceived.Add("RegressionStart");
             }
+
+            Game1.player.addItemToInventory((Item)new Underwear(100));
         }
 
         private void ReceiveMenuChanged(object sender, MenuChangedEventArgs e)
@@ -83,42 +85,42 @@ namespace SM
             }
             else if (Game1.currentLocation is SeedShop && e.NewMenu is ShopMenu seedShop)
             {
-                string fieldName1 = "forSale";
-                List<Item> field1 = seedShop.GetField<List<Item>>(fieldName1);
-                string fieldName2 = "itemPriceAndStock";
-                Dictionary<Item, int[]> field2 = seedShop.GetField<Dictionary<Item, int[]>>(fieldName2);
-                List<string> stringList = Strings.ValidUnderwearTypes();
-                stringList.Remove("Joja diaper");
-                foreach (string type in stringList)
+                string saleFieldName = "forSale";
+                List<Item> saleField = seedShop.GetField<List<Item>>(saleFieldName);
+                string priceFieldName = "itemPriceAndStock";
+                Dictionary<Item, int[]> priceField = seedShop.GetField<Dictionary<Item, int[]>>(priceFieldName);
+                List<int> underwearList = Strings.ValidUnderwearTypes();
+                underwearList.Remove((int)UnderwearType.JojaDiaper);
+                foreach (int type in underwearList)
                 {
                     Underwear underwear = new Underwear(type, 0.0f, 0.0f, 1);
-                    field1.Add((Item)underwear);
-                    field2.Add((Item)underwear, new int[2]
+                    saleField.Add((Item)underwear);
+                    priceField.Add((Item)underwear, new int[2]
                     {
-            underwear.container.price,
-            999
+                        underwear.price,
+                        999
                     });
                 }
             }
             else if (Game1.currentLocation is JojaMart && e.NewMenu is ShopMenu jojaShop)
             {
-                string fieldName1 = "forSale";
-                List<Item> field1 = jojaShop.GetField<List<Item>>(fieldName1);
-                string fieldName2 = "itemPriceAndStock";
-                Dictionary<Item, int[]> field2 = jojaShop.GetField<Dictionary<Item, int[]>>(fieldName2);
-                string[] strArray = new string[2]
+                string saleFieldName = "forSale";
+                List<Item> saleField = jojaShop.GetField<List<Item>>(saleFieldName);
+                string priceFieldName = "itemPriceAndStock";
+                Dictionary<Item, int[]> priceField = jojaShop.GetField<Dictionary<Item, int[]>>(priceFieldName);
+                int[] intArray = new int[2]
                 {
-          "Joja diaper",
-          "cloth diaper"
+                    (int)UnderwearType.JojaDiaper,
+                    (int)UnderwearType.ClothDiaper
                 };
-                foreach (string type in strArray)
+                foreach (int type in intArray)
                 {
                     Underwear underwear = new Underwear(type, 0.0f, 0.0f, 1);
-                    field1.Add((Item)underwear);
-                    field2.Add((Item)underwear, new int[2]
+                    saleField.Add((Item)underwear);
+                    priceField.Add((Item)underwear, new int[2]
                     {
-            (int) ((double) underwear.container.price * 1.20000004768372),
-            999
+                        (int) ((double) underwear.price * 1.20000004768372),
+                        999
                     });
                 }
             }
@@ -149,7 +151,6 @@ namespace SM
 
             if (string.IsNullOrWhiteSpace(Constants.SaveFolderName))
                 return;
-            this.body.underwearContainer = this.body.underwear.container;
             this.Helper.Data.WriteJsonFile<Body>(string.Format("{0}/RegressionSave.json", (object)Constants.SaveFolderName), this.body);
         }
 
@@ -171,7 +172,7 @@ namespace SM
                 if (!SM.RegressionMod.started)
                     return;
 
-                if (!SM.RegressionMod.morningHandled && !Game1.fadeToBlack && SM.RegressionMod.player1.CanMove)
+                if (!SM.RegressionMod.morningHandled && !Game1.fadeToBlack && player1.CanMove)
                 {
                     this.body.HandleMorning();
                     SM.RegressionMod.morningHandled = true;
@@ -193,7 +194,7 @@ namespace SM
                 if (Game1.player.isEating && Game1.activeClickableMenu == null && SM.RegressionMod.foodToHandle == null)
                 {
                     //Get item being eaten from SDV Farmer class
-                    SM.RegressionMod.foodToHandle = SM.RegressionMod.player1.itemToEat.Name.ToLower();
+                    SM.RegressionMod.foodToHandle = player1.itemToEat.Name.ToLower();
                 }
                 //If the player has an item to eat and isn't eating then process the item then null the value
                 else if (SM.RegressionMod.foodToHandle != null && !Game1.player.isEating)
@@ -214,44 +215,51 @@ namespace SM
         private void ReceiveKeyPress(object sender, ButtonPressedEventArgs e)
         {
             if (e.Button == SButton.MouseRight)
-            {
+            { 
+                //monitor.Log(String.Format("Active Object is {0}", Game1.player.CurrentItem != null), LogLevel.Debug);
+                //
+                //bool isItem = Game1.player.CurrentItem is Item;
+                //bool isUnderwear = isItem ? (Item)player1.CurrentItem is Underwear : false;
+                //monitor.Log(String.Format("Is Item {0} && Is Underwear {1}", isItem, isUnderwear), LogLevel.Debug);
+
                 //Don't take action when in menus and events
-                if ((Game1.dialogueUp || Game1.currentMinigame != null || (Game1.eventUp || Game1.activeClickableMenu != null) || Game1.menuUp || Game1.fadeToBlack) || (SM.RegressionMod.player1.isRidingHorse() || !SM.RegressionMod.player1.canMove || (Game1.player.isEating || SM.RegressionMod.player1.canOnlyWalk) || SM.RegressionMod.player1.FarmerSprite.pauseForSingleAnimation))
+                if ((Game1.dialogueUp || Game1.currentMinigame != null || (Game1.eventUp || Game1.activeClickableMenu != null) || Game1.menuUp || Game1.fadeToBlack) || (player1.isRidingHorse() || !player1.canMove || (player1.isEating || player1.canOnlyWalk) || player1.FarmerSprite.pauseForSingleAnimation))
                     return;
                 //If holding a watering can drink from it
-                if (SM.RegressionMod.player1.CurrentTool != null && SM.RegressionMod.player1.CurrentTool is WateringCan)
+                if (player1.CurrentTool != null && player1.CurrentTool is WateringCan)
                     this.body.DrinkWateringCan();
-                else if (SM.RegressionMod.player1.ActiveObject is Underwear activeObject)
+                //Is the active item an object and if so is it underwear
+                else if (player1.CurrentItem is Underwear activeObject)
                 {
+                    monitor.Log(String.Format("Underwear is washable {0} and clean {1}", activeObject.washable, activeObject.CleanStatus), LogLevel.Debug);
                     //If the held underwear is not wet/messy and not drying then swap it with the current underwear
-                    if (activeObject.container.wetness + activeObject.container.messiness == 0.0 && !activeObject.container.isDrying)
+                    //TODO: Don't need to check wet/messy
+                    if (activeObject.Wetness + activeObject.Messiness == 0.0 && activeObject.cleanStatus == 0)
                     {
-                        SM.RegressionMod.player1.reduceActiveItemByOne();
-                        Underwear underwear = body.ChangeUnderwear(activeObject);
-                        if (!SM.RegressionMod.player1.addItemToInventoryBool((Item)underwear, false))
-                            Game1.activeClickableMenu = (IClickableMenu)new ItemGrabMenu(new List<Item>() { (Item)underwear });
+                        player1.reduceActiveItemByOne();
+                        Underwear oldUnderwear = body.ChangeUnderwear(activeObject);
+                        if (!player1.addItemToInventoryBool((Item)oldUnderwear, false))
+                            Game1.activeClickableMenu = (IClickableMenu)new ItemGrabMenu(new List<Item>() { (Item)oldUnderwear });
                     }
-                    else if (activeObject.container.washable && !activeObject.container.isDrying)
+                    else if (activeObject.washable && activeObject.CleanStatus > 1)
                     {
                         GameLocation currentLocation = Game1.currentLocation;
-                        Vector2 toolLocation = SM.RegressionMod.player1.GetToolLocation(false);
+                        Vector2 toolLocation = player1.GetToolLocation(false);
                         int x = (int)toolLocation.X;
                         int y = (int)toolLocation.Y;
 
                         //Is the player next to water with dirty, dry underwear, then clean it; better method? - https://github.com/Platonymous/Stardew-Valley-Mods/blob/master/SwimSuit/SwimSuitMod.cs
                         if (currentLocation.doesTileHaveProperty(x / Game1.tileSize, y / Game1.tileSize, "Water", "Back") != null || currentLocation.doesTileHaveProperty(x / Game1.tileSize, y / Game1.tileSize, "WaterSource", "Back") != null)
                         {
-                            Animations.AnimateWashingUnderwear(activeObject.container);
-                            activeObject.container.wetness = 0.0f;
-                            activeObject.container.messiness = 0.0f;
-                            activeObject.container.isDrying = true;
+                            Animations.AnimateWashingUnderwear(activeObject);
+                            activeObject.CleanUnderwear();
                         }
                     }
                 }
                 else
                 {
                     GameLocation currentLocation = Game1.currentLocation;
-                    Vector2 toolLocation = SM.RegressionMod.player1.GetToolLocation(false);
+                    Vector2 toolLocation = player1.GetToolLocation(false);
                     int x = (int)toolLocation.X;
                     int y = (int)toolLocation.Y;
                     Vector2 tile = new Vector2((float)(x / Game1.tileSize), (float)(y / Game1.tileSize));
@@ -314,6 +322,10 @@ namespace SM
                         if (config.Debug)
                         {
                             //TimeMagic.DoMagic();
+                            Underwear test = new Underwear(100, 20f, 0f, 1);
+                            //Underwear test = new Underwear(100);
+                            //test.AddPee(20);
+                            Game1.player.addItemToInventory((Item)test);
                             break;
                         }
                         break;
@@ -321,11 +333,11 @@ namespace SM
                         //Toggle wetting / messing
                         config.Wetting = !config.Wetting;
                         config.Messing = !config.Messing;
-                        Monitor.Log(String.Format("Weeting and messing {0}", config.Debug ? "Enabled" : "Disabled"));
+                        Monitor.Log(String.Format("Wetting and messing {0}", config.Debug ? "Enabled" : "Disabled"), LogLevel.Debug);
                         break;
                     case SButton.F9:
                         RegressionMod.config.Debug = !SM.RegressionMod.config.Debug;
-                        Monitor.Log(String.Format("Debug {0}", config.Debug ? "Enabled" : "Disabled"));
+                        Monitor.Log(String.Format("Debug {0}", config.Debug ? "Enabled" : "Disabled"), LogLevel.Debug);
                         Game1.addHUDMessage(new HUDMessage(String.Format("Debug {0}", config.Debug ? "Enabled" : "Disabled"), 2));
                         break;
                 }
@@ -348,7 +360,7 @@ namespace SM
         {
             int x1 = Game1.viewport.Width - (65 + StatusBars.barWidth);
             int y1 = Game1.viewport.Height - (25 + StatusBars.barHeight);
-            if (Game1.currentLocation is MineShaft || Game1.currentLocation is Woods || Game1.currentLocation is SlimeHutch || SM.RegressionMod.player1.health < SM.RegressionMod.player1.maxHealth)
+            if (Game1.currentLocation is MineShaft || Game1.currentLocation is Woods || Game1.currentLocation is SlimeHutch || player1.health < player1.maxHealth)
                 x1 -= 58;
 
             if (config.Debug)
@@ -384,13 +396,13 @@ namespace SM
             //Draw underwear icon
             //TODO: move to be in menu?
             int y2 = ((Netcode.NetObjectList<Quest>)Game1.player.questLog).Count == 0 ? 250 : 310;
-            Animations.DrawUnderwearIcon(this.body.underwear.container, Game1.viewport.Width - 94, y2);
+            Animations.DrawUnderwearIcon(this.body.underwear, Game1.viewport.Width - 94, y2);
         }
 
         private void GiveUnderwear()
         {
             List<Item> objList = new List<Item>();
-            foreach (string validUnderwearType in Strings.ValidUnderwearTypes())
+            foreach (int validUnderwearType in Strings.ValidUnderwearTypes())
                 objList.Add((Item)new Underwear(validUnderwearType, 0.0f, 0.0f, 20));
             objList.Add((Item)new StardewValley.Object(399, 99, false, -1, 0));
             objList.Add((Item)new StardewValley.Object(348, 99, false, -1, 0));

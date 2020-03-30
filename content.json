@@ -1,0 +1,24 @@
+{
+    "Format": "1.13.0",
+    "Changes": [
+       {
+          "Action": "EditData",
+          "Target": "Data/ClothingInformation",
+          "Entries": {
+            "-3": "Name/Display Name/Description/Male Tile Sheet/Female Tile Sheet/Price/colour/Dyeable/Clothes Type",
+            "100": "Black Thong/Black Thong/A lacy black thong./0/-1/150/255 235 203/false/Pants",
+            "101": "Polka Dot Panties/Polka Dot Panties/A pair of simple white panties with pink polka dots./1/-1/150/255 235 203/false/Pants",
+            "102": "Big Kid Undies/Big Kid Undies/A pair of cotton undies for big kids only./2/-1/150/255 235 203/true/Pants",
+            "103": "Dinosaur Undies/Dinosaur Undies/A pair of green undies covered in adorable dinosaurs./5/-1/150/255 235 203/false/Pants",
+            "104": "Lavender Pullup/Lavender Pullup/A soft and snug flowery lavender pullup./4/-1/150/255 235 203/false/Pants",
+            "105": "Training Pants/Training Pants/A pair of thin washable potty training pants with a waterproof elastic outside and padding inside./5/-1/150/255 235 203/false/Pants",
+            "106": "Joja Diaper/Joja Diaper/A thin white plastic diaper from JojaMart./6/-1/150/255 235 203/false/Pants",
+            "107": "Baby Print Diaper/Baby Print Diaper/A little soft and crinkly fresh-scented baby print diaper./7/-1/150/255 235 203/false/Pants",
+            "108": "Cloth Diaper/Cloth Diaper/A thick and soft white cloth diaper./8/-1/150/255 235 203/false/Pants",
+            "109": "Space Diaper/Space Diaper/A very thick and soft blue plastic diaper with spaceship designs./9/-1/150/255 235 203/false/Pants",
+            "110": "Pawprint Diaper/Pawprint Diaper/A puffy super absorbent plastic diaper with cute animal prints and fade-when-wet little paws./10/-1/150/255 235 203/false/Pants",
+            "111": "Massive Diaper/Massive Diaper/An absolutely massive diaper with enough padding to easily last several days./10/-1/150/255 235 203/false/Pants"
+          }
+        }
+    ]
+ }  

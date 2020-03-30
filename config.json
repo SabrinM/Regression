@@ -1,10 +1,10 @@
 {
-  "AlwaysNoticeAccidents": false,
-  "Debug": false,
-  "Easymode": false,
-  "Lang": null,
   "Messing": true,
+  "Wetting": true,
+  "Easymode": false,
   "NoFriendshipPenalty": false,
+  "Debug": false,
   "NoHungerAndThirst": false,
-  "Wetting": true
+  "AlwaysNoticeAccidents": false,
+  "Lang": null
 }

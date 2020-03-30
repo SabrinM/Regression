@@ -41,17 +41,14 @@ namespace SM
         public float bowelContinence = 1f;
         public float[] stomach = new float[2];
         public float lastStamina;
-        [NonSerialized]
         public Underwear underwear;
-        public Container underwearContainer;
-        public Container pants; //Need to make pants pull name/null from clothing
+        public Underwear bottoms; //Need to make pants pull name/null from clothing
 
         //Constructor that starts with default underwear + pants
         public Body()
         {
-            underwear = new Underwear(new Container("dinosaur undies", 0.0f, 0.0f));
-            underwearContainer = underwear.container;
-            pants = new Container("blue jeans", 0.0f, 0.0f);
+            underwear = new Underwear((int)UnderwearType.DinosaurUndies);
+            bottoms = new Underwear((int)UnderwearType.Pants);
         }
 
         //Public access to add food to body
@@ -386,13 +383,13 @@ namespace SM
                 else
                 {
                     //float sleepOverflow = 
-                    pants.AddPee(underwear.AddPee(amount));
+                    bottoms.AddPee(underwear.AddPee(amount));
                 }
             }
             else if (wettingUnderwear)
             {
                 //float overflow = 
-                pants.AddPee(underwear.AddPee(amount));
+                bottoms.AddPee(underwear.AddPee(amount));
             }
 
             //Keep wetting until bladder is empty
@@ -412,12 +409,12 @@ namespace SM
 
             //If player is sleeping, ?villager?, didn't overflow into pants, or was on the toilet don't give overflow debuff
             if (sleeping 
-                || Animations.HandleVillager(this, false, wettingUnderwear, pants.wetness > 0.0, false, 20, 3) 
-                || pants.wetness <= 0.0 
+                || Animations.HandleVillager(this, false, wettingUnderwear, bottoms.Wetness > 0.0, false, 20, 3) 
+                || bottoms.Wetness <= 0.0 
                 || !wettingUnderwear)
                 return;
 
-            HandlePeeOverflow(pants);
+            HandlePeeOverflow(bottoms);
         }
 
         public void StartMessing(bool voluntary = false, bool inUnderwear = true)
@@ -459,13 +456,13 @@ namespace SM
                 else
                 {
                     //float sleepOverflow = 
-                    pants.AddPoop(underwear.AddPoop(amount));
+                    bottoms.AddPoop(underwear.AddPoop(amount));
                 }
             }
             else if (messingUnderwear)
             {
                 //float overflow = 
-                pants.AddPoop(underwear.AddPoop(amount));
+                bottoms.AddPoop(underwear.AddPoop(amount));
             }
             if (bowels > 0.0)
                 return;
@@ -477,9 +474,9 @@ namespace SM
         {
             isMessing = false;
             Animations.AnimateMessingEnd();
-            if (sleeping || (Animations.HandleVillager(this, true, messingUnderwear, pants.messiness > 0.0, false, 20, 3) || pants.messiness <= 0.0 || !messingUnderwear))
+            if (sleeping || (Animations.HandleVillager(this, true, messingUnderwear, bottoms.Messiness > 0.0, false, 20, 3) || bottoms.Messiness <= 0.0 || !messingUnderwear))
                 return;
-            HandlePoopOverflow(pants);
+            HandlePoopOverflow(bottoms);
         }
 
         //Change to use +/- percents instead of extra bool
@@ -542,12 +539,12 @@ namespace SM
         }
 
         //Gives debuff based on overflow amount
-        public void HandlePeeOverflow(Container pants)
+        public void HandlePeeOverflow(Underwear bottoms)
         {
             Animations.Write(RegressionMod.data.Pee_Overflow, this);
 
             //Scale the defense debuff based on amount of overflow (1->10)
-            float overflow = (pants.wetness / pants.absorbency) * 10f;
+            float overflow = (bottoms.Wetness / bottoms.absorbency) * 10f;
             int defense = -Math.Max(
                 Math.Min((int)overflow, 10) //Percentage of overflow times 10 (wetness at double absorbancy is 10)
                 , 1);
@@ -556,7 +553,7 @@ namespace SM
             {
                 description = string.Format("{0} {1} Defense.", (object)Strings.RandString(RegressionMod.data.Debuff_Wet_Pants), (object)defense),
                 millisecondsDuration = 1080000, // 18 minutes
-                glow = pants.messiness > 0.0 ? Color.Brown : Color.Yellow,
+                glow = bottoms.Messiness > 0.0 ? Color.Brown : Color.Yellow,
                 sheetIndex = -1,
                 which = 111
             };
@@ -568,11 +565,11 @@ namespace SM
             Game1.buffsDisplay.addOtherBuff(buff);
         }
 
-        public void HandlePoopOverflow(Container pants)
+        public void HandlePoopOverflow(Underwear underwear)
         {
             Animations.Write(RegressionMod.data.Poop_Overflow, this);
 
-            float overflow = pants.messiness / pants.containment;
+            float overflow = underwear.Messiness / underwear.containment;
             //100% -> -3, 50% -> -2, 0% -> -1
             int speed = overflow >= 0.5 ? (overflow > 1.0 ? -3 : -2) : -1;
 
@@ -610,7 +607,7 @@ namespace SM
         public void HandleNight()
         {
             lastStamina = Game1.player.stamina;
-            pants = new Container("bed", 0.0f, 0.0f);
+            bottoms = new Underwear((int)UnderwearType.Bed);
             sleeping = true;
             if (bedtime <= 0)
                 return;
@@ -635,19 +632,19 @@ namespace SM
                 peedToiletLastNight = 0;
                 poopedToiletLastNight = 0;
                 sleeping = false;
-                pants = new Container("blue jeans", 0.0f, 0.0f);
+                bottoms = new Underwear((int)UnderwearType.Pants);
             }
             else
             {
                 if (!RegressionMod.config.Easymode)
                 {
                     //Lower stamina regen if pants are soiled
-                    if (pants.messiness > 0.0 || pants.wetness > Body.glassOfWater)
+                    if (bottoms.Messiness > 0.0 || bottoms.Wetness > Body.glassOfWater)
                     {
                         beddingDryTime = Game1.timeOfDay + 1500;
                         Game1.player.Stamina -= 100f;
                     }
-                    else if (pants.wetness > 0.0)
+                    else if (bottoms.Wetness > 0.0)
                     {
                         beddingDryTime = Game1.timeOfDay + 900;
                         Game1.player.Stamina -= 50f;
@@ -662,7 +659,7 @@ namespace SM
                 poopedToiletLastNight = 0;
 
                 sleeping = false;
-                pants = new Container("blue jeans", 0.0f, 0.0f);
+                bottoms = new Underwear((int)UnderwearType.Pants);
             }
         }
 
@@ -725,10 +722,11 @@ namespace SM
             this.underwear = underwear;
 
             //TODO: Make this take from clothes
-            pants = new Container("blue jeans", 0.0f, 0.0f);
+            bottoms = new Underwear((int)UnderwearType.Pants);
            
             CleanPants();
-            
+
+            //RegressionMod.monitor.Log(underwear.name, StardewModdingAPI.LogLevel.Debug);
             Animations.Say(RegressionMod.data.Change, this);
             return oldUnderwear;
         }

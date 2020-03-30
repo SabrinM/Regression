@@ -58,6 +58,7 @@ namespace SM
         public string[] Debuff_Wet_Pants;
         public string[] Debuff_Messy_Pants;
         public Dictionary<string, Dictionary<string, string[]>> Villager_Reactions;
-        public Dictionary<string, Container> Underwear_Options;
+        //public Dictionary<string, Container> Underwear_Options;
+        public Dictionary<int, string> underwearInformation;
     }
 }

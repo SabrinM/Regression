@@ -1,0 +1,17 @@
+{
+    "100": "Thong/A/lacy thong./20/10/0/150/255 235 203/true/true/false",
+    "101": "Polka Dot Panties/A pair of/simple white panties with pink polka dots./20/50/1/150/255 235 203/false/true/false",
+    "102": "Big Kid Undies/A pair of/cotton undies for big kids only./20/50/2/150/255 235 203/true/true/false",
+    "103": "Dinosaur Undies/A pair of/green undies covered in adorable dinosaurs./20/50/5/150/255 235 203/false/true/false",
+    "104": "Lavender Pullup/A/soft and snug flowery lavender pullup./500/180/4/150/255 235 203/false/false/true",
+    "105": "Training Pants/A pair of/thin washable potty training pants with a waterproof elastic outside and padding inside./400/180/5/150/255 235 203/false/false/true",
+    "106": "Joja Diaper/A/thin white plastic diaper from JojaMart./399/151/6/150/255 235 203/false/false/true",
+    "107": "Baby Print Diaper/A/little soft and crinkly fresh-scented baby print diaper./1000/320/7/150/255 235 203/false/false/true",
+    "108": "Cloth Diaper/A/thick and soft white cloth diaper./1400/440/8/150/255 235 203/false/true/true",
+    "109": "Space Diaper/A/very thick and soft blue plastic diaper with spaceship designs./2100/340/9/150/255 235 203/false/false/true",
+    "110": "Pawprint Diaper/A/puffy super absorbent plastic diaper with cute animal prints and fade-when-wet little paws./2800/440/10/150/255 235 203/false/false/true",
+    "111": "Massive Diaper/A/super massive diaper with enough padding to easily last several days./3500/2900/10/150/255 235 203/false/false/true",
+    "-1": "Pants/A pair of/regular pants./500/120/-0/2000/255 235 203/false/true/false",
+    "-2": "Bed/A/very cozy bed./2500/240/-0/0/255 235 203/false/true/false",
+    "-3": "Name/Prefix/Description/Absorbancy/Containment/SpriteIndex/Price/Colour/Dyeable/Washable/isDiaper"
+}

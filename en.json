@@ -315,7 +315,6 @@
 
 	"Change": [
 		"You change into $PANTS_PREFIX$ clean $PANTS_NAME$ and $INSPECT_UNDERWEAR_NAME$."
-		//***"You take off your soiled <OLD_UNDERWEAR_DESC> and put on $UNDERWEAR_PREFIX$ clean $UNDERWEAR_NAME$."
 	],
 	"PeekWaistband": [
 		"You peek inside your waistband and see"
@@ -326,14 +325,14 @@
 	"Underwear_Clean": "clean $UNDERWEAR_DESC$",
 	"Underwear_Drying": "drying $UNDERWEAR_DESC$",
 
-	"Underwear_Wet": [ //Chosen based on diaper wetness, applied after Underwear_Messy. Words in brackets only show if underwear is also messy.
+	"Underwear_Wet": [
 		"slightly damp $UNDERWEAR_DESC$",
 		"somewhat wet $UNDERWEAR_DESC$",
 		"very wet $UNDERWEAR_DESC$",
 		"drenched $UNDERWEAR_DESC$",
 		"dripping wet $UNDERWEAR_DESC$"
 	],
-	"Underwear_Messy": [ //Chosen based on diaper messiness, applied before Underwear_Wet. Words in brackets are only used if underwear is also wet.
+	"Underwear_Messy": [
 		"<and >slightly poopy $UNDERWEAR_DESC$",
 		"<and >somewhat poopy $UNDERWEAR_DESC$",
 		"<and >poopy $UNDERWEAR_DESC$",

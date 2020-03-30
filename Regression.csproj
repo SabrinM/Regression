@@ -45,6 +45,7 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="Microsoft.Xna.Framework.Game" />
+    <Reference Include="System.Xml" />
     <Reference Include="xTile" />
   </ItemGroup>
   <ItemGroup>

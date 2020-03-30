@@ -1,0 +1,11 @@
+﻿{
+    "Name": "RegressionContentPack",
+    "Author": "Sabrina",
+    "Version": "1.0.0",
+    "Description": "Content Pack For Regression",
+    "UniqueID": "Sabrina.RegressionPack",
+    "ContentPackFor": {"UniqueID": "Sabrina.Regression", 
+                        "MinimumVersion":"1.0.0"},
+    "MinimumApiVersion": "3.3.0",
+    "UpdateKeys": []
+}
